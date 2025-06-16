@@ -5,30 +5,28 @@ Kurz 'Datový analytik s Pythonem'
 
 author: Jana Zamachajeva
 email: janazamachajeva@seznam.cz
+
 """
+
 import random
 
 separator = "-"*50
 
-results = {
-    "bulls": 0,
-    "cows": 0
-}
+const = 4
 
-# pocitadlo pokusu
-counter = 0
-
-# funkce pro kontrolu vstupu
-# zadane cislo musi mit 4 unikatni cislice a nesmi zacinat nulou
+# input control function
+# the number should be 4 digits long and cant start with 0
 def input_control(number):
     if not number.isdigit():
         print("Enter a number, not just random letters.")
         return False
-    if len(number) != 4:
-        print(f"The number is {len(number)}",
-              "characters long, enter a 4-digit number.")
+    if len(number) != const:
+        print(
+            f"The number is {len(number)} characters long, "                  
+            f"enter a {const}-digit number."
+            )
         return False
-    if len(set(number)) != 4:
+    if len(set(number)) != const:
         print("All the digits should be different.")
         return False
     if number[0] == "0":
@@ -36,73 +34,76 @@ def input_control(number):
         return False
     return True
 
-# funkce pro vyhodnoceni bulls/cows
+# generating random 4-digit number, cant start with 0
+def comp_number():
+    x = random.sample(range(10), 4)
+    if x[0] == 0:
+        return comp_number()
+    return ''.join(str(d) for d in x)
+
+# evaluation of bulls/cows
 def evaluating_the_number(mine, comp):
-    for digit in range(4):
-        if mine[digit] in comp:
-            results["cows"] += 1
-            if mine[digit] == comp[digit]:
-                results["bulls"] += 1
-    return results["bulls"], results["cows"]
+    bulls = 0
+    cows = 0
+    for digit in range(const):
+        if mine[digit] in str(comp):
+            cows += 1
+            if mine[digit] == str(comp)[digit]:
+                bulls += 1
+    return bulls, cows
 
-# pozdrav
-print(   
-    separator,
-    "Hi there!",
-    separator,
-    "I\'ve generated a random 4 digit number for you.",
-    "Let\'s play a bulls and cows game.",
-    separator,
-    sep="\n"
-)
+def main():
 
-# vygenerovani 4mistneho cisla s unikatnimi cislicemi
-figure = random.sample(range(10), 4)
-if figure[0] == 0: # pokud cislo zacina 0, prohodim prvni 2 cifry
-    figure[0], figure[1] = figure[1], figure[0]
-comp_number = ''.join(str(f) for f in figure)
+    # number of guesses
+    counter = 0
 
-# uzivatelsky vstup
-while True:
-    my_number = input("Enter a number: ")
-    print(separator)
-    """
-    nasledujici maly loop tu uvadim z toho duvodu, ze pokud uzivatel zada
-    spravne 4mistne cislo az po nekolika pokusech, je lepsi naznacit, ze
-    posledni cislo je spravne a hra muze zacit 
-    """
-    if input_control(my_number):
-        print("So, let\'s play!") 
-        break
+    # introduction message for an user
+    print(   
+        separator,
+        "Hi there!",
+        separator,
+        "I\'ve generated a random 4 digit number for you.",
+        "Let\'s play a bulls and cows game.",
+        separator,
+        sep="\n"
+    )
 
-# porovnani vstupu a random vygenerovaneho cisla
-while True:
-    counter += 1
-    results["bulls"] = 0
-    results["cows"] = 0
+    secret = comp_number()
 
-    # vyhodnoceni zadaneho cisla
-    if not input_control(my_number):
-        print("C\'mon, you know that this number is not ok.")
-    evaluating_the_number(my_number, comp_number)
-
-    # vypisovani vysledku
-    if results["bulls"] == 4:
-        print(f"Correct, you\'ve guessed the right number in {counter}",
-              "guesses!")
-        break
-    else:
-        if results["bulls"] == 1 and results["cows"] == 1:
-            print("1 bull, 1 cow", separator, sep="\n")
-            my_number = input("Try again: ")
-        elif results["bulls"] == 1:
-            print(f"1 bull, {results["cows"]} cows", separator, sep="\n")
-            my_number = input("Try again: ")
-        elif results["cows"] == 1:
-            print(f"{results["bulls"]} bulls, 1 cow", separator, sep="\n")
-            my_number = input("Try again: ")
-        else:   
-            print(f"{results["bulls"]} bulls, {results["cows"]} cows", 
-                  separator, sep="\n")
-            my_number = input("Try again: ")
+    # enter a number
+    while True:
+        my_number = input("Enter a number: ")
         print(separator)
+        if input_control(my_number):
+            print("So, let\'s play!") 
+            break
+    
+    # comparing the user number and randomly generated number
+    while True:
+        counter += 1
+
+        bulls, cows = evaluating_the_number(my_number, secret)
+
+        # results
+        if bulls == const:
+            print(f"Correct, you\'ve guessed the right number in {counter}",
+            "guesses!")
+            break
+        else:
+            if bulls == 1 and cows == 1:
+                print("1 bull, 1 cow", separator, sep="\n")
+                my_number = input("Try again: ")
+            elif bulls == 1:
+                print(f"1 bull, {cows} cows", separator, sep="\n")
+                my_number = input("Try again: ")
+            elif cows == 1:
+                print(f"{bulls} bulls, 1 cow", separator, sep="\n")
+                my_number = input("Try again: ")
+            else:   
+                print(f"{bulls} bulls, {cows} cows", 
+                    separator, sep="\n")
+                my_number = input("Try again: ")
+            print(separator)
+
+if __name__ == "__main__":
+    main()
